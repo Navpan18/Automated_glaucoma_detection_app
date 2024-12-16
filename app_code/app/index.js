@@ -12,12 +12,14 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import axios from "axios";
 
+
 export default function Index() {
   const [image, setImage] = useState(null);
   const [loading, setLoading] = useState(false);
   const [diseaseLoading, setDiseaseLoading] = useState(false);
   const [prediction, setPrediction] = useState(null);
   const [diseaseData, setDiseaseData] = useState(null);
+  const [isHealthy, setIsHealthy] = useState(false); // New state to track healthy status
 
   // Function to pick an image from the gallery
   const pickImage = async () => {
@@ -31,6 +33,7 @@ export default function Index() {
       setImage(result.assets[0].uri);
       setPrediction(null); // Clear previous prediction
       setDiseaseData(null); // Clear previous disease data
+      setIsHealthy(false); // Reset healthy status
     }
   };
 
@@ -45,6 +48,7 @@ export default function Index() {
       setImage(result.assets[0].uri);
       setPrediction(null); // Clear previous prediction
       setDiseaseData(null); // Clear previous disease data
+      setIsHealthy(false); // Reset healthy status
     }
   };
 
@@ -75,6 +79,11 @@ export default function Index() {
         }
       );
       setPrediction(res.data.prediction);
+
+      // Handle the response: Check if it's "Healthy"
+      if (res.data.prediction === "normal") {
+        setIsHealthy(true);
+      }
     } catch (error) {
       console.error("Error uploading image:", error);
       alert("Failed to upload the image. Please try again.");
@@ -100,10 +109,10 @@ export default function Index() {
     }
   };
 
-  // Show disease data when prediction is available
+  // Show disease data when prediction is available and not healthy
   React.useEffect(() => {
-    if (prediction) {
-      fetchDiseaseData(prediction); // Fetch data based on prediction (Blight, Brown Spot, etc.)
+    if (prediction && prediction !== "normal" && prediction === "glaucoma") {
+      fetchDiseaseData(prediction); // Fetch data for diseases like Glaucoma
     }
   }, [prediction]);
 
@@ -133,6 +142,12 @@ export default function Index() {
         <View style={styles.resultContainer}>
           <Text style={styles.resultTitle}>Prediction Result</Text>
           <Text style={styles.resultText}>{prediction}</Text>
+        </View>
+      )}
+
+      {isHealthy && (
+        <View style={styles.healthyContainer}>
+          <Text style={styles.healthyText}>Healthy ✔️</Text>
         </View>
       )}
 
@@ -303,5 +318,17 @@ const styles = StyleSheet.create({
     color: "#777",
     marginTop: 20,
     textAlign: "center",
+  },
+  healthyContainer: {
+    marginTop: 30,
+    padding: 20,
+    backgroundColor: "#e6ffe6",
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  healthyText: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#28a745",
   },
 });
