@@ -66,7 +66,7 @@ export default function Index() {
 
     try {
       const res = await axios.post(
-        "https://navpan2-sarva-api.hf.space/predict",
+        "https://navpan2-testapinavn.hf.space/predict",
         formData,
         {
           headers: {
